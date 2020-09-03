@@ -252,11 +252,17 @@ Resources:
               - !Sub 'arn:aws:s3:::${BackupBucket}/*'
             Condition:
               ArnNotEquals:
-                aws:PrincipalArn:
-                  # add your IAM users/groups/roles here
-                  - !GetAtt BackupFunctionRole.Arn
-                  - !GetAtt S3ReplicationRole.Arn
-                  - !Sub 'arn:aws:iam::${AWS::AccountId}:role/Administrator'
+                Fn::If:
+                  - CrossAccountReplicationEnabled
+                  - aws:PrincipalArn:
+                    # add your IAM users/groups/roles here
+                    - !GetAtt BackupFunctionRole.Arn
+                    - !GetAtt S3ReplicationRole.Arn
+                    - !Sub 'arn:aws:iam::${AWS::AccountId}:role/Administrator'
+                  - aws:PrincipalArn:
+                    # add your IAM users/groups/roles here
+                    - !GetAtt BackupFunctionRole.Arn
+                    - !Sub 'arn:aws:iam::${AWS::AccountId}:role/Administrator'
 
   BackupFunctionRole:
     Type: AWS::IAM::Role
